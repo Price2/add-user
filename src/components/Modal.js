@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -101,7 +102,7 @@ BootstrapDialogTitle.propTypes = {
 
 
 
-export default function ModalForm({ toggleForm, formState, submit }) {
+export default function ModalForm({ toggleForm, formState, submit, saveEditState, editedUser }) {
   const [fullname, setFullName] = React.useState("");
   const [username, setUserName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -148,7 +149,21 @@ export default function ModalForm({ toggleForm, formState, submit }) {
     submit(form_obj)
   }
 
-  
+  useEffect(() => {
+    if (saveEditState == 'Edit'){
+      console.log("Edited user? ", saveEditState)
+      setFullName(editedUser.full_name);
+      setUserName(editedUser.user_name);
+      setEmail(editedUser.e_mail);
+      setGroup(editedUser.group);
+      setAssignProfile(editedUser.assignprofile);
+    }
+   
+  }, [saveEditState]);
+
+
+
+
   return (
     <div>
       <Button sx={{ backgroundColor: '#22a565', color: 'white' }} variant="outlined" onClick={handleClose}>
@@ -238,67 +253,3 @@ export default function ModalForm({ toggleForm, formState, submit }) {
     </div>
   );
 }
-
-  // const [open, setOpen] = React.useState(false);
-  // const [email, setEmail] = React.useState("")
-
-  // const handleClickOpen = () => {
-  //   setOpen(true);
-  // };
-
-  // // const handleClose = () => {
-  // //   setOpen(false);
-  // // };
-  // const handleClose = () => {
-  //   toggleForm()
-  // }
-  // const emailInp = (e) => {
-  //   console.log("Email ", e.target.value)
-  //   setEmail(e.target.value)
-  // }
-
-  // return (
-  //   <div>
-  //     <Button sx={{ backgroundColor: '#22a565', color: 'white' }} variant="outlined" onClick={handleClose}>
-  //       <AddIcon />Add New
-  //     </Button>
-  //     <Dialog open={formState} >
-  //       <DialogTitle>Subscribe</DialogTitle>
-  //       <DialogContent>
-  //         <DialogContentText>
-  //           To subscribe to this website, please enter your email address here. We
-  //           will send updates occasionally.
-  //         </DialogContentText>
-  //         <TextField
-  //           autoFocus
-  //           error
-  //           margin="dense"
-  //           id="name"
-  //           label="Email Address"
-  //           type="email"
-  //           fullWidth
-  //           variant="standard"
-  //           helperText="Incorrect entry."
-  //           value={email}
-  //           onChange={emailInp}
-  //         />
-  //         <InputLabel htmlFor="input-with-icon-adornment">
-  //           With a start adornment
-  //         </InputLabel>
-  //         <Input
-  //           id="input-with-icon-adornment"
-  //           startAdornment={
-  //             <InputAdornment position="start">
-  //               <AccountCircle />
-  //             </InputAdornment>
-  //           }
-  //         />
-  //       </DialogContent>
-  //       <DialogActions sx={{ display: 'flex', justifyContent: 'center' }}>
-  //         <Button onClick={handleClose}>Cancel</Button>
-  //         <Button onClick={handleClose}>Save</Button>
-  //       </DialogActions>
-  //     </Dialog>
-  //   </div>
-  // );
-

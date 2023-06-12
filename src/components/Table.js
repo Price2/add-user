@@ -58,7 +58,7 @@ const rows = [
  
 ];
 
-export default function DataGridTable({data}) {
+export default function DataGridTable({data, edit}) {
 
   const handleRowClick = (params) => {
     console.log('Movie' +JSON.stringify(params.row)+' clicked');
@@ -80,7 +80,7 @@ export default function DataGridTable({data}) {
         pageSizeOptions={[100]}
         checkboxSelection
         disableRowSelectionOnClick
-        onRowClick={handleRowClick}
+        onRowClick={edit}
       />
     </Box>
   );

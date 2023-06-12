@@ -85,14 +85,13 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 export default function PersistentDrawerLeft() {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [, setMobileMoreAnchorEl] = React.useState(null);
 
-  const [profile, setProfile] = React.useState(false);
+  const [saveEdit, setSaveEdit] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openForm, setOpenForm] = React.useState(false);
   const [formData, setFormData] = React.useState([]);
-
+  const [currentuser, setCurrentUser] = React.useState("");
   const open_dropdown = Boolean(anchorEl);
 
 
@@ -114,9 +113,18 @@ export default function PersistentDrawerLeft() {
     setOpen(false);
   };
 
-  const toggleModal = () => {
-    setOpenForm(!openForm)
+  const toggleAddUserModal = () => {
+    setOpenForm(!openForm);
+    setSaveEdit("Save");
+
     console.log("modal state: ", openForm)
+  }
+
+  const editUser = (params) => {
+    console.log('Movie' + JSON.stringify(params.row) + ' clicked');
+    setSaveEdit("Edit")
+    setCurrentUser(params.row)
+    setOpenForm(true);
   }
 
   const submitModal = (data) => {
@@ -145,9 +153,9 @@ export default function PersistentDrawerLeft() {
 
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' }, color: 'gray' }}>
-            <IconButton sx={{padding:0}} size="larger" color="inherit">
+            <IconButton sx={{ padding: 0 }} size="larger" color="inherit">
               <Badge color="error">
-                <HelpOutlineIcon sx={{fontSize:'28px', color:'gray'}} />
+                <HelpOutlineIcon sx={{ fontSize: '28px', color: 'gray' }} />
               </Badge>
             </IconButton>
             <IconButton
@@ -184,9 +192,9 @@ export default function PersistentDrawerLeft() {
               aria-haspopup="true"
               aria-expanded={open_dropdown ? 'true' : undefined}
               onClick={handleClick}
-              sx={{color:'gray'}}
+              sx={{ color: 'gray' }}
             >
-             {open_dropdown ? <ExpandLess /> : <ExpandMore />}
+              {open_dropdown ? <ExpandLess /> : <ExpandMore />}
             </Button>
             <Menu
               id="demo-positioned-menu"
@@ -269,9 +277,9 @@ export default function PersistentDrawerLeft() {
           </Button> */}
 
 
-          <ModalForm toggleForm={toggleModal} submit={submitModal} formState={openForm} />
+          <ModalForm toggleForm={toggleAddUserModal} submit={submitModal} formState={openForm} saveEditState={saveEdit} editedUser={currentuser} />
         </Box>
-        <DataGridTable data={formData} />
+        <DataGridTable data={formData} edit={editUser} />
       </Main>
     </Box>
   );
