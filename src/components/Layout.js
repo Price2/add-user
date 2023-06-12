@@ -75,6 +75,8 @@ export default function PersistentDrawerLeft() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [openForm, setOpenForm] = React.useState(false);
+  const [formData, setFormData] = React.useState([]);
 
   const handleChange = (event) => {
     setSearchTerm(event.target.value);
@@ -88,10 +90,14 @@ export default function PersistentDrawerLeft() {
     setOpen(false);
   };
 
-  const modalInputs = (data)=>{
-    console.log(data)
+  const toggleModal = () => {
+    setOpenForm(!openForm)
+    console.log("modal state: ", openForm)
   }
 
+  const submitModal = (data)=>{
+    setFormData( current => [...current, data])
+  }
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -144,7 +150,7 @@ export default function PersistentDrawerLeft() {
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
         </DrawerHeader>
-        <img src={image} style={{ width: '60%', alignSelf: 'center' }} alt="Logo"/>
+        <img src={image} style={{ width: '60%', alignSelf: 'center' }} alt="Logo" />
 
 
         <TextField
@@ -182,9 +188,9 @@ export default function PersistentDrawerLeft() {
           </Button> */}
 
 
-          <ModalForm myfunc = {modalInputs}/>
+          <ModalForm toggleForm={toggleModal} submit={submitModal} formState= {openForm}/>
         </Box>
-        <DataGridTable/>
+        <DataGridTable data= {formData} />
       </Main>
     </Box>
   );
