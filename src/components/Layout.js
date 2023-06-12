@@ -16,15 +16,23 @@ import NestedList from './List';
 import image from '../images/reno.png'
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment, TextField } from "@mui/material";
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
 import DataGridTable from './Table';
-import ModalForm from './Modal'
-
-
+import ModalForm from './Modal';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import Badge from '@mui/material/Badge';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Avatar from '@mui/material/Avatar';
+import Stack from '@mui/material/Stack';
+import ListItemButton from '@mui/material/ListItemButton';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import Button from '@mui/material/Button';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 const drawerWidth = 240;
+const menuId = 'primary-search-account-menu';
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -71,13 +79,29 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
+
+
+
 export default function PersistentDrawerLeft() {
   const theme = useTheme();
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [, setMobileMoreAnchorEl] = React.useState(null);
+
+  const [profile, setProfile] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openForm, setOpenForm] = React.useState(false);
   const [formData, setFormData] = React.useState([]);
 
+  const open_dropdown = Boolean(anchorEl);
+
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
   const handleChange = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -95,8 +119,8 @@ export default function PersistentDrawerLeft() {
     console.log("modal state: ", openForm)
   }
 
-  const submitModal = (data)=>{
-    setFormData( current => [...current, data])
+  const submitModal = (data) => {
+    setFormData(current => [...current, data])
   }
   return (
     <Box sx={{ display: 'flex' }}>
@@ -119,15 +143,72 @@ export default function PersistentDrawerLeft() {
             Tue Jan 12, 2021 9:39 AM
           </Typography>
 
-          <List>
+          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, color: 'gray' }}>
+            <IconButton size="large" color="inherit">
+              <Badge color="error">
+                <HelpOutlineIcon />
+              </Badge>
+            </IconButton>
+            <IconButton
+              size="large"
+              aria-label="show 17 new notifications"
+              color="inherit"
+            >
 
-            <ListItem disablePadding>
-              <ListItemButton sx={{ textAlign: 'center' }}>
-                <ListItemText primary='Testing' />
-              </ListItemButton>
-            </ListItem>
+              <Badge badgeContent={17} color="error">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-controls={menuId}
+              aria-haspopup="true"
+              color="inherit"
+            >
+            </IconButton>
+            <Divider sx={{ mr: 2 }} orientation="vertical" flexItem />
+            <Typography sx={{ fontWeight: 'bold', color: '#050e2d', mr: 1, alignSelf: 'center' }}>
+              Nader Amer
+            </Typography>
+            <Stack direction="row" spacing={2}>
+              <Avatar sx={{ bgcolor: 'lightBlue', width: 35, height: 35, color: '#050e2d', fontWeight: 'bold', alignSelf: 'center' }}>NA</Avatar>
+            </Stack>
 
-          </List>
+
+            <Button
+              id="demo-positioned-button"
+              aria-controls={open_dropdown ? 'demo-positioned-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={open_dropdown ? 'true' : undefined}
+              onClick={handleClick}
+              sx={{color:'gray'}}
+            >
+             {open_dropdown ? <ExpandLess /> : <ExpandMore />}
+            </Button>
+            <Menu
+              id="demo-positioned-menu"
+              aria-labelledby="demo-positioned-button"
+              anchorEl={anchorEl}
+              open={open_dropdown}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+            >
+              <MenuItem onClick={handleClose}>Profile</MenuItem>
+              <MenuItem onClick={handleClose}>My account</MenuItem>
+              <MenuItem onClick={handleClose}>Logout</MenuItem>
+            </Menu>
+
+          </Box>
 
         </Toolbar>
       </AppBar>
@@ -188,9 +269,9 @@ export default function PersistentDrawerLeft() {
           </Button> */}
 
 
-          <ModalForm toggleForm={toggleModal} submit={submitModal} formState= {openForm}/>
+          <ModalForm toggleForm={toggleModal} submit={submitModal} formState={openForm} />
         </Box>
-        <DataGridTable data= {formData} />
+        <DataGridTable data={formData} />
       </Main>
     </Box>
   );
