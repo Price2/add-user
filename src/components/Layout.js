@@ -145,9 +145,9 @@ export default function PersistentDrawerLeft() {
 
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' }, color: 'gray' }}>
-            <IconButton size="large" color="inherit">
+            <IconButton sx={{padding:0}} size="larger" color="inherit">
               <Badge color="error">
-                <HelpOutlineIcon />
+                <HelpOutlineIcon sx={{fontSize:'28px', color:'gray'}} />
               </Badge>
             </IconButton>
             <IconButton
