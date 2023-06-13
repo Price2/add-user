@@ -25,11 +25,9 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
-import ListItemButton from '@mui/material/ListItemButton';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 const drawerWidth = 240;
 const menuId = 'primary-search-account-menu';
@@ -86,12 +84,12 @@ export default function PersistentDrawerLeft() {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
-  const [saveEdit, setSaveEdit] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openForm, setOpenForm] = React.useState(false);
   const [formData, setFormData] = React.useState([]);
   const [currentuser, setCurrentUser] = React.useState("");
+  const [filteredusers, setFilteredUsers] = React.useState([])
   const open_dropdown = Boolean(anchorEl);
 
 
@@ -115,172 +113,227 @@ export default function PersistentDrawerLeft() {
 
   const toggleAddUserModal = () => {
     setOpenForm(!openForm);
-    setSaveEdit("Save");
 
     console.log("modal state: ", openForm)
   }
 
-  const editUser = (params) => {
-    console.log('Movie' + JSON.stringify(params.row) + ' clicked');
-    setSaveEdit("Edit")
-    setCurrentUser(params.row)
-    setOpenForm(true);
-  }
+  const handleFilter = ({ search, username, dateFrom, dateTo }) => {
+    if (search && username && dateFrom && dateTo) {
+      const usersFiltered = formData.filter((user) => {
 
-  const submitModal = (data) => {
-    setFormData(current => [...current, data])
-  }
-  return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <AppBar position="fixed" open={open}>
-        <Toolbar sx={{ backgroundColor: "white", textAlign: 'center' }}>
-          <IconButton
-            color="black"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography sx={{ mr: 2, color: 'black', fontWeight: 'bold' }} variant="p" noWrap component="div">
-            Good Morning!
-          </Typography>
-          <Typography sx={{ color: "black" }} variant="span" noWrap component="div">
-            Tue Jan 12, 2021 9:39 AM
-          </Typography>
+        if ((user.user_name === search || user.full_name === search) && (user.date === dateFrom || user.date === dateTo)) {
+          return true
+        }
+        else {
+          return false
+        }
 
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, color: 'gray' }}>
-            <IconButton sx={{ padding: 0 }} size="larger" color="inherit">
-              <Badge color="error">
-                <HelpOutlineIcon sx={{ fontSize: '28px', color: 'gray' }} />
-              </Badge>
-            </IconButton>
+      })
+      setFilteredUsers(usersFiltered)
+
+    }
+    else if (search && username) {
+      const usersFiltered = formData.filter((user) => {
+
+        if ((user.user_name === search && user.full_name === search)) {
+          return true
+        }
+        else {
+          return false
+        }
+
+      })
+      setFilteredUsers(usersFiltered)
+    }
+
+    else if (search && (dateFrom || dateTo)) {
+      const usersFiltered = formData.filter((user) => {
+
+        if ((user.user_name === search && (user.date === dateFrom || user.date === dateTo))) {
+          return true
+        }
+        else {
+          return false
+        }
+
+      })
+      setFilteredUsers(usersFiltered)
+    }
+
+
+    const editUser = (params) => {
+      console.log('Movie' + JSON.stringify(params.row) + ' clicked');
+      setCurrentUser(params.row)
+      setOpenForm(true);
+    }
+
+    const submitModal = (user) => {
+      if (formData.length) {
+        const filtered_users = filterUsersById(user)
+        filtered_users.push(user)
+        setFormData(current => filtered_users)
+        console.log("filtered user: ", filtered_users)
+        return;
+      }
+      setFormData(current => [...current, user])
+    }
+
+    const filterUsersById = (form_user) => {
+      return formData.filter((user) => user.id !== form_user.id)
+    }
+    console.log("submitted user: ", formData)
+    return (
+      <Box sx={{ display: 'flex' }}>
+        <CssBaseline />
+        <AppBar position="fixed" open={open}>
+          <Toolbar sx={{ backgroundColor: "white", textAlign: 'center' }}>
             <IconButton
-              size="large"
-              aria-label="show 17 new notifications"
-              color="inherit"
+              color="black"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{ mr: 2, ...(open && { display: 'none' }) }}
             >
-
-              <Badge badgeContent={17} color="error">
-                <NotificationsIcon />
-              </Badge>
+              <MenuIcon />
             </IconButton>
-            <IconButton
-              size="large"
-              edge="end"
-              aria-label="account of current user"
-              aria-controls={menuId}
-              aria-haspopup="true"
-              color="inherit"
-            >
-            </IconButton>
-            <Divider sx={{ mr: 2 }} orientation="vertical" flexItem />
-            <Typography sx={{ fontWeight: 'bold', color: '#050e2d', mr: 1, alignSelf: 'center' }}>
-              Nader Amer
+            <Typography sx={{ mr: 2, color: 'black', fontWeight: 'bold' }} variant="p" noWrap component="div">
+              Good Morning!
             </Typography>
-            <Stack direction="row" spacing={2}>
-              <Avatar sx={{ bgcolor: 'lightBlue', width: 40, height: 40, color: '#050e2d', fontWeight: 'bold', alignSelf: 'center' }}>NA</Avatar>
-            </Stack>
+            <Typography sx={{ color: "black" }} variant="span" noWrap component="div">
+              Tue Jan 12, 2021 9:39 AM
+            </Typography>
+
+            <Box sx={{ flexGrow: 1 }} />
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, color: 'gray' }}>
+              <IconButton sx={{ padding: 0 }} size="larger" color="inherit">
+                <Badge color="error">
+                  <HelpOutlineIcon sx={{ fontSize: '28px', color: 'gray' }} />
+                </Badge>
+              </IconButton>
+              <IconButton
+                size="large"
+                aria-label="show 17 new notifications"
+                color="inherit"
+              >
+
+                <Badge badgeContent={17} color="error">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+              <IconButton
+                size="large"
+                edge="end"
+                aria-label="account of current user"
+                aria-controls={menuId}
+                aria-haspopup="true"
+                color="inherit"
+              >
+              </IconButton>
+              <Divider sx={{ mr: 2 }} orientation="vertical" flexItem />
+              <Typography sx={{ fontWeight: 'bold', color: '#050e2d', mr: 1, alignSelf: 'center' }}>
+                Nader Amer
+              </Typography>
+              <Stack direction="row" spacing={2}>
+                <Avatar sx={{ bgcolor: 'lightBlue', width: 40, height: 40, color: '#050e2d', fontWeight: 'bold', alignSelf: 'center' }}>NA</Avatar>
+              </Stack>
 
 
-            <Button
-              id="demo-positioned-button"
-              aria-controls={open_dropdown ? 'demo-positioned-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={open_dropdown ? 'true' : undefined}
-              onClick={handleClick}
-              sx={{ color: 'gray' }}
-            >
-              {open_dropdown ? <ExpandLess /> : <ExpandMore />}
-            </Button>
-            <Menu
-              id="demo-positioned-menu"
-              aria-labelledby="demo-positioned-button"
-              anchorEl={anchorEl}
-              open={open_dropdown}
-              onClose={handleClose}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-            >
-              <MenuItem onClick={handleClose}>Profile</MenuItem>
-              <MenuItem onClick={handleClose}>My account</MenuItem>
-              <MenuItem onClick={handleClose}>Logout</MenuItem>
-            </Menu>
+              <Button
+                id="demo-positioned-button"
+                aria-controls={open_dropdown ? 'demo-positioned-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={open_dropdown ? 'true' : undefined}
+                onClick={handleClick}
+                sx={{ color: 'gray' }}
+              >
+                {open_dropdown ? <ExpandLess /> : <ExpandMore />}
+              </Button>
+              <Menu
+                id="demo-positioned-menu"
+                aria-labelledby="demo-positioned-button"
+                anchorEl={anchorEl}
+                open={open_dropdown}
+                onClose={handleClose}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'left',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'left',
+                }}
+              >
+                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem onClick={handleClose}>My account</MenuItem>
+                <MenuItem onClick={handleClose}>Logout</MenuItem>
+              </Menu>
 
-          </Box>
+            </Box>
 
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
+          </Toolbar>
+        </AppBar>
+        <Drawer
+          sx={{
             width: drawerWidth,
-            boxSizing: 'border-box',
-            backgroundColor: '#050e2d'
-          },
-        }}
-        variant="persistent"
-        anchor="left"
-        open={open}
-      >
-        <DrawerHeader>
-          <IconButton sx={{ color: 'white' }} onClick={handleDrawerClose}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <img src={image} style={{ width: '60%', alignSelf: 'center' }} alt="Logo" />
-
-
-        <TextField
-          id="search"
-          type="search"
-          label="Search"
-          value={searchTerm}
-          onChange={handleChange}
-          sx={{ width: '230px', backgroundColor: "white", borderRadius: '20px' }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <SearchIcon />
-              </InputAdornment>
-            ),
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              width: drawerWidth,
+              boxSizing: 'border-box',
+              backgroundColor: '#050e2d'
+            },
           }}
-        />
+          variant="persistent"
+          anchor="left"
+          open={open}
+        >
+          <DrawerHeader>
+            <IconButton sx={{ color: 'white' }} onClick={handleDrawerClose}>
+              {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+            </IconButton>
+          </DrawerHeader>
+          <img src={image} style={{ width: '60%', alignSelf: 'center' }} alt="Logo" />
 
-        <Divider />
-        <List sx={{ color: 'gray' }}>
 
-          <NestedList />
+          <TextField
+            id="search"
+            type="search"
+            label="Search"
+            value={searchTerm}
+            onChange={handleChange}
+            sx={{ width: '230px', backgroundColor: "white", borderRadius: '20px' }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
 
-        </List>
+          <Divider />
+          <List sx={{ color: 'gray' }}>
 
-      </Drawer>
-      <Main open={open}>
-        <DrawerHeader />
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography sx={{ fontWeight: 'bold' }} variant='h4'>
-            User Management
-          </Typography>
-          {/* <Button variant="contained" sx={{ backgroundColor: '#22a565' }}>
+            <NestedList />
+
+          </List>
+
+        </Drawer>
+        <Main open={open}>
+          <DrawerHeader />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography sx={{ fontWeight: 'bold' }} variant='h4'>
+              User Management
+            </Typography>
+            {/* <Button variant="contained" sx={{ backgroundColor: '#22a565' }}>
             <AddIcon />Add User
           </Button> */}
 
 
-          <ModalForm toggleForm={toggleAddUserModal} submit={submitModal} formState={openForm} saveEditState={saveEdit} editedUser={currentuser} />
-        </Box>
-        <DataGridTable data={formData} edit={editUser} />
-      </Main>
-    </Box>
-  );
+            <ModalForm toggleForm={toggleAddUserModal} submit={submitModal} formState={openForm} editedUser={currentuser} />
+          </Box>
+          <DataGridTable data={formData} edit={editUser} filterHandler={handleFilter}  filteredState= {filteredusers} />
+        </Main>
+      </Box>
+    );
+  }
 }

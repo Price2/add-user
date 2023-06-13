@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { v4 as uuid } from 'uuid';
-import { useEffect } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -19,6 +18,7 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import FormHelperText from '@mui/material/FormHelperText';
 
+import { format } from 'date-fns';
 
 
 
@@ -103,173 +103,184 @@ BootstrapDialogTitle.propTypes = {
 
 
 
-export default function ModalForm({ toggleForm, formState, submit, saveEditState, editedUser }) {
+export default function ModalForm({ toggleForm, formState, submit, editedUser }) {
 
   const [user, setUser] = React.useState({
-    full_name: "", 
-    user_name:"", 
-    e_mail:"",
-    group_user:"", 
-    user_profile:""
+    full_name: "",
+    user_name: "",
+    e_mail: "",
+    group_user: "",
+    user_profile: "",
+    date: ""
 
   })
 
 
-const handleUser = (e) =>{
-  setUser({...user, [e.target.name]:e.target.value})
-  console.log("user: ", e.target)
-}
-  
+  const handleUser = (e) => {
+    setUser({ ...user, [e.target.name]: e.target.value })
+  }
+
   const handleClose = () => {
-    console.log("Form Data: ", )
+    resetState()
     toggleForm()
   };
 
 
 
 
-  const handleSubmit = ()=>{
-    
-    if(user.id){
-      const form_obj ={
+  const handleSubmit = () => {
+
+    if (user.id) {
+      const currentDate = new Date()
+      const form_obj = {
         id: user.id,
         full_name: user.full_name,
         user_name: user.user_name,
         e_mail: user.e_mail,
-        group: user.group_user,
-        assignprofile: user.user_profile
-        
+        group_user: user.group_user,
+        user_profile: user.user_profile,
+        date: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
+
       }
-      setUser(form_obj)
+      setUser((previous) => form_obj)
       toggleForm()
       submit(form_obj)
+      resetState()
       console.log("IF: ", user)
 
-      
+
     }
-    else{
-      const unique_id = uuid();
-      const form_obj ={
+    else {
+      const currentDate = new Date()
+      const unique_id = uuid().slice(0, 8);
+      console.log("ID ", unique_id)
+      const form_obj = {
         id: unique_id,
         full_name: user.full_name,
         user_name: user.user_name,
         e_mail: user.e_mail,
-        group: user.group_user,
-        assignprofile: user.user_profile
-        
+        group_user: user.group_user,
+        user_profile: user.user_profile,
+        date: format(new Date(), 'yyyy/MM/dd')
       }
-      setUser(form_obj)
+      setUser((prev)=> form_obj)
       toggleForm()
       submit(form_obj)
-      console.log("ELSE: ", user)
+      resetState()
+      // console.log("finished submit: ", user)
     }
   }
 
-  // useEffect(() => {
-  //   if (saveEditState == 'Edit'){
-  //     console.log("Edited user? ", saveEditState)
-  //     setFullName(editedUser.full_name);
-  //     setUserName(editedUser.user_name);
-  //     setEmail(editedUser.e_mail);
-  //     setGroup(editedUser.group);
-  //     setAssignProfile(editedUser.assignprofile);
-  //   }
-   
-  // }, [saveEditState]);
+  const resetState = () => {
+    setUser((prev) => {return {full_name: "", 
+    user_name: "",
+    e_mail: "",
+    group_user: "",
+    user_profile: "",
+    date: ""}
+})
+
+  }
+
+React.useEffect(() => {
+  if (user.full_name === '') {
+    console.log('use effect used')
+    setUser(editedUser)
+  }
+}, [editedUser]);
 
 
+const { full_name, user_name, e_mail, group_user, user_profile } = user
+console.log("state ", user)
+return (
+  <div>
+    <Button sx={{ backgroundColor: '#22a565', color: 'white' }} variant="outlined" onClick={handleClose}>
+      <AddIcon />Add New
+    </Button>
+    <BootstrapDialog
+      onClose={handleClose}
+      aria-labelledby="customized-dialog-title"
+      open={formState}
+    >
+      <BootstrapDialogTitle sx={{ backgroundColor: "#050e2d", color: "white" }} id="customized-dialog-title" onClose={handleClose}>
+        Add New User
+      </BootstrapDialogTitle>
+      <DialogContent dividers>
+        <InputLabel shrink htmlFor="bootstrap-input">
+          Full Name
+        </InputLabel>
+        <BootstrapInput name="full_name" value={full_name} onChange={handleUser} required error label="Error" placeholder="Enter full name" id="fullname-input" helpertext="Incorrect entry." />
 
-  const {full_name, user_name, e_mail, group_user, user_profile} = user
-  console.log("Initial states ",user)
-  return (
-    <div>
-      <Button sx={{ backgroundColor: '#22a565', color: 'white' }} variant="outlined" onClick={handleClose}>
-        <AddIcon />Add New
-      </Button>
-      <BootstrapDialog
-        onClose={handleClose}
-        aria-labelledby="customized-dialog-title"
-        open={formState}
-      >
-        <BootstrapDialogTitle sx={{ backgroundColor: "#050e2d", color: "white" }} id="customized-dialog-title" onClose={handleClose}>
-          Add New User
-        </BootstrapDialogTitle>
-        <DialogContent dividers>
-          <InputLabel shrink htmlFor="bootstrap-input">
-            Full Name
-          </InputLabel>
-          <BootstrapInput name="full_name" value={full_name}  onChange={handleUser} required error label="Error" placeholder="Enter full name" id="fullname-input" helpertext="Incorrect entry." />
+        <InputLabel shrink htmlFor="userName-input">
+          User Name
+        </InputLabel>
+        <BootstrapInput name="user_name" value={user_name} onChange={handleUser} error placeholder='Enter Username' label="Error" id="userName-input" helpertext="Incorrect entry." />
 
-          <InputLabel shrink htmlFor="userName-input">
-            User Name
-          </InputLabel>
-          <BootstrapInput name="user_name" value={user_name}  onChange={handleUser} error placeholder='Enter Username' label="Error" id="userName-input" helpertext="Incorrect entry." />
+        <InputLabel shrink htmlFor="email-input">
+          Email Address
+        </InputLabel>
+        <BootstrapInput name="e_mail" value={e_mail} onChange={handleUser} error placeholder='Enter user email address' label="Error" id="email-input" helpertext="Incorrect entry." />
 
-          <InputLabel shrink htmlFor="email-input">
-            Email Address
-          </InputLabel>
-          <BootstrapInput name="e_mail" value={e_mail}  onChange={handleUser} error placeholder='Enter user email address' label="Error" id="email-input" helpertext="Incorrect entry." />
+        <InputLabel shrink htmlFor="user-group">
+          User Group
+        </InputLabel>
 
-          <InputLabel shrink htmlFor="user-group">
-            User Group
-          </InputLabel>
-
-          <FormControl required sx={{ mt: 0, minWidth: 525 }}>
-            <InputLabel id="user-group-label">Group User</InputLabel>
-            <Select
-              labelId="user-group-required-label"
-              id="user-group-required"
-              name="group_user"
-              value={group_user}
-              defaultValue=''
-              label="User Group *"
-              onChange={handleUser}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={'Active'}>Active</MenuItem>
-              <MenuItem value={'Inactive'}>Inactive</MenuItem>
-              <MenuItem value={'Locked'}>Locked</MenuItem>
-            </Select>
-            <FormHelperText>Required</FormHelperText>
-          </FormControl>
-
-
-          <InputLabel sx={{ mt: 2}} shrink htmlFor="assign-profile">
-            Assign Profile
-          </InputLabel>
-          <FormControl required sx={{ mt: 0, minWidth: 525 }}>
-            <InputLabel id="assign-profile">Assign Profile</InputLabel>
-            <Select
-              labelId="assign-profile-required-label"
-              id="assign-profile-required"
-              name = "user_profile"
-              value={user_profile}
-              label="User Group *"
-              onChange={handleUser}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={'profile1'}>profile1</MenuItem>
-              <MenuItem value={'profile2'}>profile2</MenuItem>
-              <MenuItem value={'profile3'}>profile3</MenuItem>
-            </Select>
-            <FormHelperText>Required</FormHelperText>
-          </FormControl>
+        <FormControl required sx={{ mt: 0, minWidth: 525 }}>
+          <InputLabel id="user-group-label">Group User</InputLabel>
+          <Select
+            labelId="user-group-required-label"
+            id="user-group-required"
+            name="group_user"
+            value={group_user}
+            defaultValue=''
+            label="User Group *"
+            onChange={handleUser}
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            <MenuItem value={'Active'}>Active</MenuItem>
+            <MenuItem value={'Inactive'}>Inactive</MenuItem>
+            <MenuItem value={'Locked'}>Locked</MenuItem>
+          </Select>
+          <FormHelperText>Required</FormHelperText>
+        </FormControl>
 
 
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleSubmit}>
-            Save changes
-          </Button>
-          <Button autoFocus onClick={handleClose}>
-            Cancel
-          </Button>
-        </DialogActions>
-      </BootstrapDialog>
-    </div>
-  );
+        <InputLabel sx={{ mt: 2 }} shrink htmlFor="assign-profile">
+          Assign Profile
+        </InputLabel>
+        <FormControl required sx={{ mt: 0, minWidth: 525 }}>
+          <InputLabel id="assign-profile">Assign Profile</InputLabel>
+          <Select
+            labelId="assign-profile-required-label"
+            id="assign-profile-required"
+            name="user_profile"
+            value={user_profile}
+            label="User Group *"
+            onChange={handleUser}
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            <MenuItem value={'profile1'}>profile1</MenuItem>
+            <MenuItem value={'profile2'}>profile2</MenuItem>
+            <MenuItem value={'profile3'}>profile3</MenuItem>
+          </Select>
+          <FormHelperText>Required</FormHelperText>
+        </FormControl>
+
+
+      </DialogContent>
+      <DialogActions>
+        <Button autoFocus onClick={handleSubmit}>
+          Save changes
+        </Button>
+        <Button autoFocus onClick={handleClose}>
+          Cancel
+        </Button>
+      </DialogActions>
+    </BootstrapDialog>
+  </div>
+);
 }
