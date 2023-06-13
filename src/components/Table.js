@@ -4,7 +4,11 @@ import { DataGrid } from '@mui/x-data-grid';
 import { useMovieData } from '@mui/x-data-grid-generator';
 
 const columns = [
-//   { field: 'id', headerName: 'ID', width: 90 },
+  {
+    field: 'id',
+    headerName: 'ID',
+    width: 90,
+  },
   {
     field: 'full_name',
     headerName: 'Name',
@@ -48,35 +52,32 @@ const columns = [
   },
 ];
 
-const rows = [
-  // { id: 1, Name: 'Snow', Username: 'Jon', email: 'john@gmail.com' , Group:'office', Status:'Inactive', CreatedOn:'11/03/2022'},
-  // { id: 2, Name: 'User2', Username: 'User2name', email: 'john@gmail.com' , Group:'office', Status:'Inactive', CreatedOn:'11/03/2022' },
-  // { id: 3, Name: 'User3', Username: 'User3name', email: 'john@gmail.com' , Group:'office', Status:'Inactive', CreatedOn:'11/03/2022' },
-  // { id: 4, Name: 'User4', Username: 'User4name', email: 'john@gmail.com' , Group:'office', Status:'Inactive', CreatedOn:'11/03/2022' },
-  // { id: 5, Name: 'User5', Username: 'User5name', email: 'john@gmail.com' , Group:'office', Status:'Inactive', CreatedOn:'11/03/2022' },
-  // { id: 6, Name: 'User6', Username: 'User6name', email: 'john@gmail.com' , Group:'office', Status:'Inactive', CreatedOn:'11/03/2022' },
- 
-];
 
-export default function DataGridTable({data, edit}) {
+export default function DataGridTable({ data, edit }) {
 
   const handleRowClick = (params) => {
-    console.log('Movie' +JSON.stringify(params.row)+' clicked');
+    console.log('Movie' + JSON.stringify(params.row) + ' clicked');
   };
   console.log("data received: ", data)
   return (
-    <Box sx={{ height: 'fit-content', width: '100%', mt:5 }}>
+    <Box sx={{ height: 'fit-content', width: '100%', mt: 5 }}>
       <DataGrid
-        rows={data}
-        columns={columns}
-        getRowId={(row) =>  row.full_name + row.user_name}
         initialState={{
+          columns: {
+            columnVisibilityModel: {
+              // Hide columns status and traderName, the other columns will remain visible
+              id: false,
+            },
+          },
           pagination: {
             paginationModel: {
               pageSize: 100,
             },
           },
         }}
+        rows={data}
+        columns={columns}
+        getRowId={(row) => row.full_name + row.user_name}
         pageSizeOptions={[100]}
         checkboxSelection
         disableRowSelectionOnClick

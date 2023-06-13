@@ -182,7 +182,7 @@ export default function PersistentDrawerLeft() {
               Nader Amer
             </Typography>
             <Stack direction="row" spacing={2}>
-              <Avatar sx={{ bgcolor: 'lightBlue', width: 35, height: 35, color: '#050e2d', fontWeight: 'bold', alignSelf: 'center' }}>NA</Avatar>
+              <Avatar sx={{ bgcolor: 'lightBlue', width: 40, height: 40, color: '#050e2d', fontWeight: 'bold', alignSelf: 'center' }}>NA</Avatar>
             </Stack>
 
 
