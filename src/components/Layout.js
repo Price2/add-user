@@ -88,7 +88,8 @@ export default function PersistentDrawerLeft() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openForm, setOpenForm] = React.useState(false);
   const [formData, setFormData] = React.useState([]);
-  const [currentuser, setCurrentUser] = React.useState("");
+  const [selectedUser, setSelectedUsers] = React.useState([]);
+  const [editToggle, setEditToggle] = React.useState(false)
   const [filteredusers, setFilteredUsers] = React.useState([])
   const open_dropdown = Boolean(anchorEl);
 
@@ -114,14 +115,30 @@ export default function PersistentDrawerLeft() {
   const toggleAddUserModal = () => {
     setOpenForm(!openForm);
 
-    console.log("modal state: ", openForm)
   }
 
-  const handleFilter = ({ search, username, dateFrom, dateTo }) => {
-    if (search && username && dateFrom && dateTo) {
+  const handleFilter = ({ search, username, status, dateFrom, dateTo }) => {
+    if ( (dateFrom && dateTo) && formData.length ) {
+      const usersFiltered = formData.filter((user) => {
+        if (user.date >= dateFrom && user.date <= dateTo) {
+          return true
+        }
+        return false
+      })
+      if (!usersFiltered.length) {
+        setFilteredUsers([])
+        return
+    }
+    setFilteredUsers(usersFiltered)
+  }
+    if ( (search && username && dateFrom && dateTo && status) && formData.length) {
+
       const usersFiltered = formData.filter((user) => {
 
-        if ((user.user_name === search || user.full_name === search) && (user.date === dateFrom || user.date === dateTo)) {
+        if ((user.full_name.toLowerCase() === search.toLowerCase() || user.user_name.toLowerCase() === username.toLowerCase()) &&
+          (user.group_user === status) &&
+          (user.date >= dateFrom && user.date <= dateTo)
+        ) {
           return true
         }
         else {
@@ -129,13 +146,26 @@ export default function PersistentDrawerLeft() {
         }
 
       })
+      if (!usersFiltered.length) {
+        setFilteredUsers([])
+        return
+      }
       setFilteredUsers(usersFiltered)
 
     }
-    else if (search && username) {
+    else if ( (search && status && username) && formData.length) {
+      const usersFiltered = formData.filter((user) => (user.user_name.toLowerCase() === username.toLowerCase()) && (user.group_user === status) && (user.full_name.toLowerCase() === search.toLowerCase()))
+      if (!usersFiltered.length) {
+        setFilteredUsers([])
+        return
+      }
+      setFilteredUsers(usersFiltered)
+    }
+
+    else if ( (search && dateFrom && dateTo) && formData.length) {
       const usersFiltered = formData.filter((user) => {
 
-        if ((user.user_name === search && user.full_name === search)) {
+        if ((user.full_name.toLowerCase() === search.toLowerCase() && (user.date === dateFrom && user.date === dateTo))) {
           return true
         }
         else {
@@ -143,13 +173,16 @@ export default function PersistentDrawerLeft() {
         }
 
       })
+      if (!usersFiltered.length) {
+        setFilteredUsers([])
+        return
+      }
       setFilteredUsers(usersFiltered)
     }
 
-    else if (search && (dateFrom || dateTo)) {
+    else if ( (search && username) && formData.length) {
       const usersFiltered = formData.filter((user) => {
-
-        if ((user.user_name === search && (user.date === dateFrom || user.date === dateTo))) {
+        if ((user.full_name.toLowerCase() === search.toLowerCase() && user.user_name.toLowerCase() === username.toLowerCase())) {
           return true
         }
         else {
@@ -157,183 +190,254 @@ export default function PersistentDrawerLeft() {
         }
 
       })
+      if (!usersFiltered.length) {
+        setFilteredUsers([])
+        return
+      }
       setFilteredUsers(usersFiltered)
     }
 
-
-    const editUser = (params) => {
-      console.log('Movie' + JSON.stringify(params.row) + ' clicked');
-      setCurrentUser(params.row)
-      setOpenForm(true);
+    else if ( (search && status) && formData.length) {
+      const usersFiltered = formData.filter((user) => (user.full_name.toLowerCase() === search.toLowerCase()) && (user.group_user === status))
+      if (!usersFiltered.length) {
+        setFilteredUsers([])
+        return
+      }
+      setFilteredUsers(usersFiltered)
     }
+    else if ( (username && status) && formData.length) {
+      const usersFiltered = formData.filter((user) => (user.user_name.toLowerCase() === username.toLowerCase()) && (user.group_user === status))
+      if (!usersFiltered.length) {
+        setFilteredUsers([])
+        return
+      }
+    }
+    else if (username && formData.length) {
+      const usersFiltered = formData.filter((user) => user.user_name.toLowerCase() === username.toLowerCase())
+      if (!usersFiltered.length) {
+        setFilteredUsers([])
+        return
+      }
+      setFilteredUsers(usersFiltered)
+    }
+    else if (search && formData.length) {
+      const usersFiltered = formData.filter((user) => user.full_name.toLowerCase() === search.toLowerCase())
+      if (!usersFiltered.length) {
+        setFilteredUsers([])
+        return
+      }
+      setFilteredUsers(usersFiltered)
+    }
+    else {
+      setFilteredUsers([])
+    }
+  }
 
-    const submitModal = (user) => {
-      if (formData.length) {
-        const filtered_users = filterUsersById(user)
-        filtered_users.push(user)
-        setFormData(current => filtered_users)
-        console.log("filtered user: ", filtered_users)
-        return;
+  const submitModal = (user) => {
+    const formData_copy = [...formData]
+    if (formData.length) {
+      const indexOfUser = formData.findIndex(i => i.id === user.id);
+      if (indexOfUser !== -1) {
+        formData_copy[indexOfUser] = user
+        setFormData(formData_copy)
+        return
       }
       setFormData(current => [...current, user])
+      return;
     }
+    setFormData(current => [...current, user])
+  }
 
-    const filterUsersById = (form_user) => {
-      return formData.filter((user) => user.id !== form_user.id)
+  const deleteUsers = (user) => {
+    const formData_copy = [...formData]
+    if (formData.length && selectedUser.length) {
+      while (selectedUser.length) {
+        const userIndex = formData_copy.findIndex(item => selectedUser.some(entry => entry.id === item.id));
+        if (userIndex !== -1) {
+          formData_copy.splice(userIndex, 1);
+        }
+        else {
+          break;
+
+        }
+      }
+      setFormData(formData_copy)
+      return;
     }
-    console.log("submitted user: ", formData)
-    return (
-      <Box sx={{ display: 'flex' }}>
-        <CssBaseline />
-        <AppBar position="fixed" open={open}>
-          <Toolbar sx={{ backgroundColor: "white", textAlign: 'center' }}>
+  }
+
+
+  const selectedUsers = (usersSelected) => {
+    const usersSel = formData.filter(({ id }) => usersSelected.includes(id));
+    setSelectedUsers(usersSel)
+
+  }
+
+  const handleEdit = () => {
+    if (selectedUser.length && selectedUser.length == 1) {
+      setOpenForm(true)
+      handleEditToggle()
+      return
+    }
+    return
+  }
+  const handleEditToggle = () => {
+    setEditToggle(!editToggle)
+  }
+
+
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <AppBar position="fixed" open={open}>
+        <Toolbar sx={{ backgroundColor: "white", textAlign: 'center' }}>
+          <IconButton
+            color="black"
+            aria-label="open drawer"
+            onClick={handleDrawerOpen}
+            edge="start"
+            sx={{ mr: 2, ...(open && { display: 'none' }) }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography sx={{ mr: 2, color: 'black', fontWeight: 'bold' }} variant="p" noWrap component="div">
+            Good Morning!
+          </Typography>
+          <Typography sx={{ color: "black" }} variant="span" noWrap component="div">
+            Tue Jan 12, 2021 9:39 AM
+          </Typography>
+
+          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, color: 'gray' }}>
+            <IconButton sx={{ padding: 0 }} size="larger" color="inherit">
+              <Badge color="error">
+                <HelpOutlineIcon sx={{ fontSize: '28px', color: 'gray' }} />
+              </Badge>
+            </IconButton>
             <IconButton
-              color="black"
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              edge="start"
-              sx={{ mr: 2, ...(open && { display: 'none' }) }}
+              size="large"
+              aria-label="show 17 new notifications"
+              color="inherit"
             >
-              <MenuIcon />
+
+              <Badge badgeContent={17} color="error">
+                <NotificationsIcon />
+              </Badge>
             </IconButton>
-            <Typography sx={{ mr: 2, color: 'black', fontWeight: 'bold' }} variant="p" noWrap component="div">
-              Good Morning!
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-controls={menuId}
+              aria-haspopup="true"
+              color="inherit"
+            >
+            </IconButton>
+            <Divider sx={{ mr: 2 }} orientation="vertical" flexItem />
+            <Typography sx={{ fontWeight: 'bold', color: '#050e2d', mr: 1, alignSelf: 'center' }}>
+              Nader Amer
             </Typography>
-            <Typography sx={{ color: "black" }} variant="span" noWrap component="div">
-              Tue Jan 12, 2021 9:39 AM
-            </Typography>
-
-            <Box sx={{ flexGrow: 1 }} />
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, color: 'gray' }}>
-              <IconButton sx={{ padding: 0 }} size="larger" color="inherit">
-                <Badge color="error">
-                  <HelpOutlineIcon sx={{ fontSize: '28px', color: 'gray' }} />
-                </Badge>
-              </IconButton>
-              <IconButton
-                size="large"
-                aria-label="show 17 new notifications"
-                color="inherit"
-              >
-
-                <Badge badgeContent={17} color="error">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-              <IconButton
-                size="large"
-                edge="end"
-                aria-label="account of current user"
-                aria-controls={menuId}
-                aria-haspopup="true"
-                color="inherit"
-              >
-              </IconButton>
-              <Divider sx={{ mr: 2 }} orientation="vertical" flexItem />
-              <Typography sx={{ fontWeight: 'bold', color: '#050e2d', mr: 1, alignSelf: 'center' }}>
-                Nader Amer
-              </Typography>
-              <Stack direction="row" spacing={2}>
-                <Avatar sx={{ bgcolor: 'lightBlue', width: 40, height: 40, color: '#050e2d', fontWeight: 'bold', alignSelf: 'center' }}>NA</Avatar>
-              </Stack>
+            <Stack direction="row" spacing={2}>
+              <Avatar sx={{ bgcolor: 'lightBlue', width: 40, height: 40, color: '#050e2d', fontWeight: 'bold', alignSelf: 'center' }}>NA</Avatar>
+            </Stack>
 
 
-              <Button
-                id="demo-positioned-button"
-                aria-controls={open_dropdown ? 'demo-positioned-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={open_dropdown ? 'true' : undefined}
-                onClick={handleClick}
-                sx={{ color: 'gray' }}
-              >
-                {open_dropdown ? <ExpandLess /> : <ExpandMore />}
-              </Button>
-              <Menu
-                id="demo-positioned-menu"
-                aria-labelledby="demo-positioned-button"
-                anchorEl={anchorEl}
-                open={open_dropdown}
-                onClose={handleClose}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left',
-                }}
-              >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
-                <MenuItem onClick={handleClose}>Logout</MenuItem>
-              </Menu>
+            <Button
+              id="demo-positioned-button"
+              aria-controls={open_dropdown ? 'demo-positioned-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={open_dropdown ? 'true' : undefined}
+              onClick={handleClick}
+              sx={{ color: 'gray' }}
+            >
+              {open_dropdown ? <ExpandLess /> : <ExpandMore />}
+            </Button>
+            <Menu
+              id="demo-positioned-menu"
+              aria-labelledby="demo-positioned-button"
+              anchorEl={anchorEl}
+              open={open_dropdown}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+            >
+              <MenuItem onClick={handleClose}>Profile</MenuItem>
+              <MenuItem onClick={handleClose}>My account</MenuItem>
+              <MenuItem onClick={handleClose}>Logout</MenuItem>
+            </Menu>
 
-            </Box>
+          </Box>
 
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          sx={{
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
             width: drawerWidth,
-            flexShrink: 0,
-            '& .MuiDrawer-paper': {
-              width: drawerWidth,
-              boxSizing: 'border-box',
-              backgroundColor: '#050e2d'
-            },
+            boxSizing: 'border-box',
+            backgroundColor: '#050e2d'
+          },
+        }}
+        variant="persistent"
+        anchor="left"
+        open={open}
+      >
+        <DrawerHeader>
+          <IconButton sx={{ color: 'white' }} onClick={handleDrawerClose}>
+            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </DrawerHeader>
+        <img src={image} style={{ width: '60%', alignSelf: 'center' }} alt="Logo" />
+
+
+        <TextField
+          id="search"
+          type="search"
+          label="Search"
+          value={searchTerm}
+          onChange={handleChange}
+          sx={{ width: '230px', backgroundColor: "white", borderRadius: '20px' }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <SearchIcon />
+              </InputAdornment>
+            ),
           }}
-          variant="persistent"
-          anchor="left"
-          open={open}
-        >
-          <DrawerHeader>
-            <IconButton sx={{ color: 'white' }} onClick={handleDrawerClose}>
-              {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-            </IconButton>
-          </DrawerHeader>
-          <img src={image} style={{ width: '60%', alignSelf: 'center' }} alt="Logo" />
+        />
 
+        <Divider />
+        <List sx={{ color: 'gray' }}>
 
-          <TextField
-            id="search"
-            type="search"
-            label="Search"
-            value={searchTerm}
-            onChange={handleChange}
-            sx={{ width: '230px', backgroundColor: "white", borderRadius: '20px' }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
+          <NestedList />
 
-          <Divider />
-          <List sx={{ color: 'gray' }}>
+        </List>
 
-            <NestedList />
-
-          </List>
-
-        </Drawer>
-        <Main open={open}>
-          <DrawerHeader />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography sx={{ fontWeight: 'bold' }} variant='h4'>
-              User Management
-            </Typography>
-            {/* <Button variant="contained" sx={{ backgroundColor: '#22a565' }}>
+      </Drawer>
+      <Main open={open}>
+        <DrawerHeader />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography sx={{ fontWeight: 'bold' }} variant='h4'>
+            User Management
+          </Typography>
+          {/* <Button variant="contained" sx={{ backgroundColor: '#22a565' }}>
             <AddIcon />Add User
           </Button> */}
 
 
-            <ModalForm toggleForm={toggleAddUserModal} submit={submitModal} formState={openForm} editedUser={currentuser} />
-          </Box>
-          <DataGridTable data={formData} edit={editUser} filterHandler={handleFilter}  filteredState= {filteredusers} />
-        </Main>
-      </Box>
-    );
-  }
+          <ModalForm toggleForm={toggleAddUserModal} submit={submitModal} formState={openForm} selectedUsers={selectedUser[0]} editState={editToggle} toggleEdit={handleEditToggle} />
+        </Box>
+        <DataGridTable data={formData} selectedUser={selectedUsers} handleEdit={handleEdit} handledeleteUser={deleteUsers} filters={handleFilter} filteredUsers={filteredusers} />
+      </Main>
+    </Box>
+  );
 }
+

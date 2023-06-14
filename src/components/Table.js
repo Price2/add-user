@@ -15,11 +15,11 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
-import dayjs from 'dayjs';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { format } from 'date-fns';
 
 const columns = [
   {
@@ -75,20 +75,41 @@ const columns = [
 
 
 
-export default function DataGridTable({ data, edit }) {
+export default function DataGridTable({ data, edit, selectedUser, handleEdit, handledeleteUser, filters, filteredUsers }) {
   // const [value, setValue] = React.useState(dayjs('2022-04-17'));
   const [filter, setFilter] = React.useState(
     {
       search: '',
       username: '',
+      status: '',
       dateFrom: '',
       dateTo: ''
     }
-  )
-  console.log(data)
-  console.log("data received: ", data)
 
-  const {search, username, dateFrom, dateTo} = filter
+  )
+  const [rowSelectionModel, setRowSelectionModel] = React.useState([]);
+
+  const handleFilter = (e, isdate) => {
+    if (isdate === 'dateFrom'){
+
+      setFilter({ ...filter, dateFrom: format(new Date(e), 'yyyy/MM/dd') })
+
+    }
+    else if (isdate === 'dateTo')
+    {
+      setFilter({ ...filter, dateTo: format(new Date(e), 'yyyy/MM/dd') })
+    }
+    else{
+      setFilter({ ...filter, [e.target.name]: e.target.value })
+    }
+
+  }
+
+  React.useEffect(() => {
+    filters(filter)
+  }, [filter])
+
+  const { search, username, status, dateFrom, dateTo } = filter
   return (
     <>
       <Paper sx={{ display: 'flex', flexDirection: "column", alignItems: "space-between" }}>
@@ -96,9 +117,11 @@ export default function DataGridTable({ data, edit }) {
           <TextField
             placeholder="Search..."
             type="search"
+            name="search"
             variant="outlined"
             size="small"
-            // onChange=""
+            value={search}
+            onChange={handleFilter}
             InputProps={{
               style: {
                 width: 300
@@ -110,23 +133,24 @@ export default function DataGridTable({ data, edit }) {
               ),
             }}
           />
-          <TextField size="small" id="outlined-basic" variant="outlined" label="User Name" />
+          <TextField name="username" value={username} onChange={handleFilter} placeholder="User Name" size="small" id="outlined-basic" variant="outlined" label="User Name" />
 
           <FormControl size="small" sx={{ m: 0, minWidth: 120 }}>
             <InputLabel size="small" id="demo-select-small-label">Any</InputLabel>
             <Select
               labelId="demo-select-small-label"
               id="demo-select-small"
-              value=""
+              name="status"
+              value={status}
+              onChange={handleFilter}
               label="Any"
-              // onChange=""
             >
               <MenuItem value="" >
                 <em>None</em>
               </MenuItem>
-              <MenuItem value={'action_1'}>Action 1</MenuItem>
-              <MenuItem value={'action_2'}>Action 2</MenuItem>
-              <MenuItem value={'action_3'}>Action 3</MenuItem>
+              <MenuItem value={'Active'}>Active</MenuItem>
+              <MenuItem value={'Inactive'}>Inactive</MenuItem>
+              <MenuItem value={'Locked'}>Locked</MenuItem>
             </Select>
           </FormControl>
 
@@ -134,8 +158,9 @@ export default function DataGridTable({ data, edit }) {
             <DemoContainer sx={{ padding: 0 }} components={['DatePicker', 'DatePicker']}>
               <DatePicker
                 labelId="demo-select-small-label"
+                name="dateFrom"
                 value={dateFrom}
-                // onChange=""
+                onChange={(date)=>handleFilter(date, 'dateFrom')}
                 slotProps={{ textField: { size: 'small', padding: 0, } }}
                 style
               />
@@ -145,8 +170,10 @@ export default function DataGridTable({ data, edit }) {
           <LocalizationProvider size="small" dateAdapter={AdapterDayjs}>
             <DemoContainer sx={{ padding: 0 }} size="small" components={['DatePicker', 'DatePicker']}>
               <DatePicker
+                name="dateTo"
                 value={dateTo}
-                // onChange=""
+                inputFormat="yyyy/MM/dd"
+                onChange={(date) => handleFilter(date, 'dateTo')}
                 slotProps={{ textField: { size: 'small' } }}
 
               />
@@ -158,10 +185,10 @@ export default function DataGridTable({ data, edit }) {
         </Box>
         <Box sx={{ m: 1, display: 'flex', flexDirection: "row", justifyContent: "space-between", alignItems: "center" }} >
           <Box sx={{ display: 'flex', gap: "15px", alignItems: "center" }}>
-            <Button sx={{ backgroundColor: "lightgray", minWidth: "10px", color: "#51576d" }} size="larger" color="inherit">
+            <Button onClick={handledeleteUser} sx={{ backgroundColor: "lightgray", minWidth: "10px", color: "#51576d" }} size="larger" color="inherit">
               <BlockIcon />
             </Button>
-            <Button sx={{ backgroundColor: "lightgray", color: "#51576d", minWidth: "10px" }} size="larger" color="inherit">
+            <Button onClick={handleEdit} sx={{ backgroundColor: "lightgray", color: "#51576d", minWidth: "10px" }} size="larger" color="inherit">
               <EditIcon />
             </Button>
 
@@ -206,14 +233,22 @@ export default function DataGridTable({ data, edit }) {
               },
             },
           }}
-          rows={data}
+          rows={filteredUsers.length ? filteredUsers : data}
           columns={columns}
           getRowId={row => row.id}
           pageSizeOptions={[100]}
           checkboxSelection
           disableRowSelectionOnClick
+          onRowSelectionModelChange={(newRowSelectionModel) => {
+            selectedUser(newRowSelectionModel);
+            setRowSelectionModel(newRowSelectionModel)
+          }}
+          rowSelectionModel={rowSelectionModel}
+
           onRowClick={edit}
+
         />
+
       </Box>
     </>
   );

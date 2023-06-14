@@ -103,7 +103,7 @@ BootstrapDialogTitle.propTypes = {
 
 
 
-export default function ModalForm({ toggleForm, formState, submit, editedUser }) {
+export default function ModalForm({ toggleForm, formState, submit, selectedUsers, editState, toggleEdit }) {
 
   const [user, setUser] = React.useState({
     full_name: "",
@@ -122,16 +122,16 @@ export default function ModalForm({ toggleForm, formState, submit, editedUser })
 
   const handleClose = () => {
     resetState()
+    toggleEdit()
     toggleForm()
   };
 
 
 
 
-  const handleSubmit = () => {
-
+  const handleSubmit = (e) => {
+    e.preventDefault();
     if (user.id) {
-      const currentDate = new Date()
       const form_obj = {
         id: user.id,
         full_name: user.full_name,
@@ -139,21 +139,18 @@ export default function ModalForm({ toggleForm, formState, submit, editedUser })
         e_mail: user.e_mail,
         group_user: user.group_user,
         user_profile: user.user_profile,
-        date: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
-
+        date: format(new Date(), 'yyyy/MM/dd')
       }
       setUser((previous) => form_obj)
       toggleForm()
       submit(form_obj)
+      toggleEdit()
       resetState()
-      console.log("IF: ", user)
 
 
     }
     else {
-      const currentDate = new Date()
       const unique_id = uuid().slice(0, 8);
-      console.log("ID ", unique_id)
       const form_obj = {
         id: unique_id,
         full_name: user.full_name,
@@ -167,7 +164,6 @@ export default function ModalForm({ toggleForm, formState, submit, editedUser })
       toggleForm()
       submit(form_obj)
       resetState()
-      // console.log("finished submit: ", user)
     }
   }
 
@@ -181,20 +177,20 @@ export default function ModalForm({ toggleForm, formState, submit, editedUser })
 })
 
   }
-
+const toggleAddNew= () =>{
+  toggleForm()
+}
 React.useEffect(() => {
-  if (user.full_name === '') {
-    console.log('use effect used')
-    setUser(editedUser)
+  if (editState === true && selectedUsers?.id) {
+    setUser(selectedUsers)
   }
-}, [editedUser]);
+}, [editState]);
 
 
 const { full_name, user_name, e_mail, group_user, user_profile } = user
-console.log("state ", user)
 return (
   <div>
-    <Button sx={{ backgroundColor: '#22a565', color: 'white' }} variant="outlined" onClick={handleClose}>
+    <Button sx={{ backgroundColor: '#22a565', color: 'white' }} variant="outlined" onClick={toggleAddNew}>
       <AddIcon />Add New
     </Button>
     <BootstrapDialog
@@ -205,21 +201,24 @@ return (
       <BootstrapDialogTitle sx={{ backgroundColor: "#050e2d", color: "white" }} id="customized-dialog-title" onClose={handleClose}>
         Add New User
       </BootstrapDialogTitle>
+      <form  onSubmit={handleSubmit}>
+
+      
       <DialogContent dividers>
         <InputLabel shrink htmlFor="bootstrap-input">
           Full Name
         </InputLabel>
-        <BootstrapInput name="full_name" value={full_name} onChange={handleUser} required error label="Error" placeholder="Enter full name" id="fullname-input" helpertext="Incorrect entry." />
+        <BootstrapInput name="full_name" value={full_name} onChange={handleUser} error label="Error" placeholder="Enter full name" id="fullname-input" helpertext="Incorrect entry." required/>
 
         <InputLabel shrink htmlFor="userName-input">
           User Name
         </InputLabel>
-        <BootstrapInput name="user_name" value={user_name} onChange={handleUser} error placeholder='Enter Username' label="Error" id="userName-input" helpertext="Incorrect entry." />
+        <BootstrapInput name="user_name" value={user_name} onChange={handleUser} error placeholder='Enter Username' label="Error" id="userName-input" helpertext="Incorrect entry." required/>
 
         <InputLabel shrink htmlFor="email-input">
           Email Address
         </InputLabel>
-        <BootstrapInput name="e_mail" value={e_mail} onChange={handleUser} error placeholder='Enter user email address' label="Error" id="email-input" helpertext="Incorrect entry." />
+        <BootstrapInput name="e_mail" value={e_mail} onChange={handleUser} error placeholder='Enter user email address' label="Error" id="email-input" helpertext="Incorrect entry." required/>
 
         <InputLabel shrink htmlFor="user-group">
           User Group
@@ -273,13 +272,14 @@ return (
 
       </DialogContent>
       <DialogActions>
-        <Button autoFocus onClick={handleSubmit}>
+        <Button type="submit" autoFocus>
           Save changes
         </Button>
         <Button autoFocus onClick={handleClose}>
           Cancel
         </Button>
       </DialogActions>
+        </form>
     </BootstrapDialog>
   </div>
 );
