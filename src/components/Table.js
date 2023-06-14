@@ -20,6 +20,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { format } from 'date-fns';
+import Avatar from '@mui/joy/Avatar';
 
 const columns = [
   {
@@ -30,8 +31,19 @@ const columns = [
   {
     field: 'full_name',
     headerName: 'Name',
-    width: 150,
+    width: 200,
     editable: false,
+    renderCell: (params) => {
+      console.log("params ", params.row.full_name.slice(0, 2))
+      return (
+        <>
+          <Avatar sx={{ display: 'flex', mr:1 }}>
+            {params.row.full_name.slice(0, 2).toUpperCase()}
+          </Avatar>
+          {params.row.full_name}
+        </>
+      )
+    },
   },
   {
     field: 'user_name',
@@ -90,16 +102,15 @@ export default function DataGridTable({ data, edit, selectedUser, handleEdit, ha
   const [rowSelectionModel, setRowSelectionModel] = React.useState([]);
 
   const handleFilter = (e, isdate) => {
-    if (isdate === 'dateFrom'){
+    if (isdate === 'dateFrom') {
 
       setFilter({ ...filter, dateFrom: format(new Date(e), 'yyyy/MM/dd') })
 
     }
-    else if (isdate === 'dateTo')
-    {
+    else if (isdate === 'dateTo') {
       setFilter({ ...filter, dateTo: format(new Date(e), 'yyyy/MM/dd') })
     }
-    else{
+    else {
       setFilter({ ...filter, [e.target.name]: e.target.value })
     }
 
@@ -160,7 +171,7 @@ export default function DataGridTable({ data, edit, selectedUser, handleEdit, ha
                 labelId="demo-select-small-label"
                 name="dateFrom"
                 value={dateFrom}
-                onChange={(date)=>handleFilter(date, 'dateFrom')}
+                onChange={(date) => handleFilter(date, 'dateFrom')}
                 slotProps={{ textField: { size: 'small', padding: 0, } }}
                 style
               />
@@ -217,6 +228,7 @@ export default function DataGridTable({ data, edit, selectedUser, handleEdit, ha
 
 
       <Box sx={{ height: 'fit-content' }}>
+
         <DataGrid
 
 
