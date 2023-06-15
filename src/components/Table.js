@@ -37,7 +37,7 @@ const columns = [
       console.log("params ", params.row.full_name.slice(0, 2))
       return (
         <>
-          <Avatar sx={{ display: 'flex', mr:1 }}>
+          <Avatar sx={{ display: 'flex', mr: 1 }}>
             {params.row.full_name.slice(0, 2).toUpperCase()}
           </Avatar>
           {params.row.full_name}
@@ -123,7 +123,13 @@ export default function DataGridTable({ data, edit, selectedUser, handleEdit, ha
   const { search, username, status, dateFrom, dateTo } = filter
   return (
     <>
-      <Paper sx={{ display: 'flex', flexDirection: "column", alignItems: "space-between" }}>
+      <Paper sx={{
+        display: 'flex', flexDirection: "column", alignItems: "space-between", boxShadow: '0', borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: 'rgba(224, 224, 224, 1)',
+        borderRadius: 'var(--unstable_DataGrid-radius)',
+        borderBottom: 0
+      }}>
         <Box sx={{ display: 'flex', gap: '15px', margin: "10px" }}>
           <TextField
             placeholder="Search..."
@@ -224,14 +230,14 @@ export default function DataGridTable({ data, edit, selectedUser, handleEdit, ha
 
           </Box>
         </Box>
-      </Paper>
+      </Paper >
 
 
       <Box sx={{ height: 'fit-content' }}>
 
         <DataGrid
 
-
+          sx={{ }}
           initialState={{
             columns: {
               columnVisibilityModel: {
