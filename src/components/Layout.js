@@ -276,13 +276,16 @@ export default function PersistentDrawerLeft() {
   const handleEdit = () => {
     if (selectedUser.length && selectedUser.length == 1) {
       setOpenForm(true)
-      handleEditToggle()
+      handleEditToggle(true)
       return
     }
     return
   }
-  const handleEditToggle = () => {
-    setEditToggle(!editToggle)
+  const handleEditToggle = (toggle) => {
+    if(toggle == 'false')
+      setEditToggle(false)
+    else
+      setEditToggle(true)
   }
 
 

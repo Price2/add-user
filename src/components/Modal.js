@@ -122,7 +122,7 @@ export default function ModalForm({ toggleForm, formState, submit, selectedUsers
 
   const handleClose = () => {
     resetState()
-    toggleEdit()
+    toggleEdit('false')
     toggleForm()
   };
 
@@ -144,7 +144,7 @@ export default function ModalForm({ toggleForm, formState, submit, selectedUsers
       setUser((previous) => form_obj)
       toggleForm()
       submit(form_obj)
-      toggleEdit()
+      toggleEdit('false')
       resetState()
 
 
@@ -177,6 +177,8 @@ export default function ModalForm({ toggleForm, formState, submit, selectedUsers
 })
 
   }
+
+
 const toggleAddNew= () =>{
   toggleForm()
 }
